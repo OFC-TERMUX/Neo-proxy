@@ -3,6 +3,10 @@ from flask import Flask, request, jsonify
 import requests
 import random
 import logging
+import urllib3
+
+# ===== DISABLE SSL WARNINGS =====
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 app = Flask(__name__)
 
@@ -56,10 +60,15 @@ def proxy(path):
     
     try:
         if method == 'GET':
-            resp = requests.get(url, headers=headers, params=request.args)
+            resp = requests.get(url, headers=headers, params=request.args, verify=False)
         elif method == 'POST':
             data = request.get_data()
-            resp = requests.post(url, data=data, headers=headers)
+            resp = requests.post(url, data=data, headers=headers, verify=False)
+        elif method == 'PUT':
+            data = request.get_data()
+            resp = requests.put(url, data=data, headers=headers, verify=False)
+        elif method == 'DELETE':
+            resp = requests.delete(url, headers=headers, verify=False)
         else:
             return jsonify({"error": "Method not supported"}), 405
         
